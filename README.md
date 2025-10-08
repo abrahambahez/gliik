@@ -1,0 +1,237 @@
+# Gliik
+
+A CLI tool for managing and executing AI prompts (called "instructions") following UNIX philosophy: composability, minimalism, and clear separation of concerns.
+
+>[!note]
+> This is an early version. Currently only supports Claude via Anthropic API.
+>
+
+## Features
+
+- Store reusable AI prompts as instructions
+- Variable substitution with `{{variable}}` syntax
+- OR logic for flexible input: `{{input|text}}`
+- Pipe stdin or use CLI flags
+- File path support for variables
+- Version management for instructions
+- Simple, composable commands
+
+## Installation
+
+### Prerequisites
+
+- Go 1.24 or later
+- Anthropic API key via ENV variable
+
+### Build from Source
+
+```bash
+git clone https://github.com/yourusername/gliik.git
+cd gliik
+go build
+```
+
+This creates a `gliik` binary in the current directory.
+
+### Install to PATH
+
+```bash
+# Move binary to a directory in your PATH
+sudo mv gliik /usr/local/bin/
+
+# Or add to your home bin directory
+mv gliik ~/bin/
+```
+
+### Setup
+
+1. Initialize Gliik:
+```bash
+gliik init
+```
+
+2. Set your Anthropic API key:
+```bash
+export ANTHROPIC_API_KEY="your-api-key-here"
+```
+
+Add this to your `~/.bashrc` or `~/.zshrc` to persist.
+
+## Quick Start
+
+### Create an Instruction
+
+```bash
+gliik add summarize -d "Summarize text"
+# Opens editor to edit system.txt
+```
+
+In the editor, write your prompt:
+```
+Please summarize the following text in one sentence:
+
+{{input|text}}
+```
+
+### Execute with Stdin
+
+```bash
+cat article.txt | gliik run summarize
+```
+
+### Execute with CLI Flag
+
+```bash
+gliik run summarize --text "Long text to summarize..."
+```
+
+### Execute with File Path
+
+```bash
+gliik run summarize --text article.txt
+```
+
+### Save Output
+
+```bash
+gliik run summarize --text article.txt --output summary.txt
+```
+
+## Commands
+
+### `gliik init`
+Initialize Gliik configuration at `~/.gliik`
+
+### `gliik add <name> -d "description"`
+Create a new instruction and open in editor
+
+### `gliik list`
+List all instructions with versions and descriptions
+
+### `gliik edit <name>`
+Edit an instruction's system.txt file
+
+### `gliik run <name> [flags]`
+Execute an instruction with AI
+
+### `gliik remove <name> [-f]`
+Delete an instruction (with optional force flag)
+
+### `gliik version <name>`
+Show instruction version
+
+### `gliik version bump <name> [description]`
+Increment patch version (0.1.0 → 0.1.1)
+
+### `gliik version set <name> <version> [description]`
+Set specific version (must be X.Y.Z format)
+
+## Variable Syntax
+
+### Simple Variable
+```
+Hello {{name}}!
+```
+Usage: `gliik run greet --name "Alice"`
+
+### OR Variable (Multiple Options)
+```
+Process this: {{input|text}}
+```
+Usage (either):
+- `cat file.txt | gliik run process`
+- `gliik run process --text "content"`
+
+### Reserved: `{{input}}`
+The `input` option is reserved for stdin only:
+```
+{{input}}       # Accepts only stdin
+{{input|text}}  # Accepts stdin OR --text flag
+```
+
+## File Structure
+
+```
+~/.gliik/
+├── config.yaml          # Configuration
+└── instructions/
+    └── <name>/
+        ├── system.txt   # Prompt template
+        └── meta.yaml    # Version and description
+```
+
+## Configuration
+
+Located at `~/.gliik/config.yaml`:
+
+```yaml
+default_model: claude-sonnet-4-20250514
+editor: vim
+```
+
+## Environment Variables
+
+- `ANTHROPIC_API_KEY` - Your Anthropic API key (required)
+- `EDITOR` - Text editor for editing instructions (default: vim)
+
+## Examples
+
+### Code Review Instruction
+
+Create:
+```bash
+gliik add review -d "Review code for issues"
+```
+
+system.txt:
+```
+You are a code reviewer. Review the following code and provide feedback:
+
+{{input|code}}
+
+Focus on:
+- Bugs and errors
+- Performance issues
+- Best practices
+```
+
+Use:
+```bash
+cat main.go | gliik run review
+# or
+gliik run review --code main.go
+```
+
+### Resume Tailoring
+
+Create:
+```bash
+gliik add tailor_resume -d "Tailor resume to job"
+```
+
+system.txt:
+```
+Tailor this resume to match the job description:
+
+Resume: {{resume}}
+Job Description: {{job}}
+
+Provide suggestions for improvements.
+```
+
+Use:
+```bash
+gliik run tailor_resume --resume resume.pdf --job job_desc.txt
+```
+
+## Tips
+
+- Use descriptive instruction names with underscores: `review_code`, `summarize_text`
+- Keep prompts focused and single-purpose
+- Use OR variables for flexibility: `{{input|text}}`
+- Version your instructions as you improve them
+- File paths are automatically detected and read
+
+## License
+
+MIT

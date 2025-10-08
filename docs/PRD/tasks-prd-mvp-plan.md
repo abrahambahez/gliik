@@ -1,0 +1,158 @@
+## Relevant Files
+
+- `main.go` - Entry point for the CLI application
+- `go.mod` - Go module definition and dependencies
+- `cmd/root.go` - Cobra root command setup
+- `cmd/init.go` - Init command implementation
+- `cmd/add.go` - Add command implementation
+- `cmd/list.go` - List command implementation
+- `cmd/edit.go` - Edit command implementation
+- `cmd/remove.go` - Remove command implementation
+- `cmd/run.go` - Run/execute instruction command
+- `cmd/version.go` - Version management command
+- `internal/config/paths.go` - File path and directory management
+- `internal/config/init.go` - Initialization logic for Gliik home directory
+- `internal/config/config.go` - Configuration loading and management
+- `internal/instruction/instruction.go` - Core instruction types and structs
+- `internal/instruction/create.go` - Instruction creation logic
+- `internal/instruction/load.go` - Instruction loading from filesystem
+- `internal/instruction/list.go` - List all instructions logic
+- `internal/instruction/variables.go` - Variable parsing from system.txt
+- `internal/instruction/resolver.go` - Variable resolution from stdin/flags
+- `internal/instruction/version.go` - Version management logic
+- `internal/ai/client.go` - Anthropic API client implementation
+- `internal/instruction/variables_test.go` - Unit tests for variable parsing
+- `internal/instruction/resolver_test.go` - Unit tests for variable resolution
+- `README.md` - User documentation and installation guide
+- `build.sh` - Build script for cross-platform binaries
+
+### Notes
+
+- Go uses test files in the same package as the code being tested (e.g., `variables.go` and `variables_test.go`)
+- Use `go test ./...` to run all tests in the project
+- Use `go test ./internal/instruction` to run tests for a specific package
+- Use `go build` to compile the binary for local development
+- The `internal/` directory prevents external packages from importing these packages (Go convention)
+
+## Tasks
+
+- [x] 1.0 Setup project foundation and initialize CLI framework
+  - [x] 1.1 Initialize Go module with `go mod init github.com/yourusername/gliik`
+  - [x] 1.2 Install Cobra CLI framework with `go get -u github.com/spf13/cobra@latest`
+  - [x] 1.3 Create project directory structure (main.go, cmd/, internal/ subdirectories)
+  - [x] 1.4 Create root command in cmd/root.go with basic Cobra setup and help text
+  - [x] 1.5 Verify build works with `go build` and test help output with `./gliik --help`
+  - [x] 1.6 Create internal/config/paths.go with GetGliikHome() and GetInstructionsDir() functions
+  - [x] 1.7 Create internal/config/init.go with Initialize() function to create directory structure
+  - [x] 1.8 Implement cmd/init.go command that calls config.Initialize()
+  - [x] 1.9 Create default config.yaml with default_model and editor settings
+  - [x] 1.10 Test init command creates ~/.gliik structure correctly
+
+- [x] 2.0 Implement core instruction management commands (init, add, list, edit, remove)
+  - [x] 2.1 [depends on: 1.0] Create internal/instruction/instruction.go with Instruction and Meta structs
+  - [x] 2.2 Install YAML library with `go get gopkg.in/yaml.v3`
+  - [x] 2.3 Create internal/instruction/create.go with name validation (alphanumeric + underscore only)
+  - [x] 2.4 Implement Create() function to generate instruction directory and files
+  - [x] 2.5 Implement meta.yaml writing with version "0.1.0" and description
+  - [x] 2.6 Implement cmd/add.go command with --description flag
+  - [x] 2.7 Add editor integration to open system.txt after creation using $EDITOR env var
+  - [x] 2.8 Test add command creates proper directory structure and opens editor
+  - [x] 2.9 Create internal/instruction/list.go with ListAll() function to scan instructions directory
+  - [x] 2.10 Implement cmd/list.go with table formatting using text/tabwriter
+  - [x] 2.11 Test list command displays instructions in table format
+  - [x] 2.12 Create internal/instruction/load.go with Load() function to read instruction from disk
+  - [x] 2.13 Implement cmd/edit.go to open system.txt in $EDITOR
+  - [x] 2.14 Test edit command opens correct file in editor
+  - [x] 2.15 Implement cmd/remove.go with confirmation prompt (skip with --force flag)
+  - [x] 2.16 Add os.RemoveAll() logic to delete instruction directory
+  - [x] 2.17 Test remove command with and without --force flag
+
+- [x] 3.0 Build variable parsing and resolution system
+  - [x] 3.1 [depends on: 2.1] Create internal/instruction/variables.go with Variable struct
+  - [x] 3.2 Implement ParseVariables() function using regex pattern `\{\{([^}]+)\}\}`
+  - [x] 3.3 Add logic to split variable options on pipe character for OR syntax
+  - [x] 3.4 Create internal/instruction/variables_test.go
+  - [x] 3.5 Write test for simple variable parsing ({{text}})
+  - [x] 3.6 Write test for OR variable parsing ({{input|text}})
+  - [x] 3.7 Write test for multiple variables in same text
+  - [x] 3.8 Write test for edge cases (spaces, special characters)
+  - [x] 3.9 Run tests and verify all variable parsing cases pass
+  - [x] 3.10 Create internal/instruction/resolver.go with Resolver struct
+  - [x] 3.11 Implement Resolve() method with left-to-right priority for OR variables
+  - [x] 3.12 Add stdin detection and resolution for "input" option
+  - [x] 3.13 Add CLI flag resolution for named variables
+  - [x] 3.14 Implement file detection with isFile() helper function
+  - [x] 3.15 Implement file reading with readFile() helper function
+  - [x] 3.16 Add error handling for stdin provided to non-stdin instruction
+  - [x] 3.17 Add error handling for missing required variables with helpful messages
+  - [x] 3.18 Create internal/instruction/resolver_test.go
+  - [x] 3.19 Write test for stdin resolution
+  - [x] 3.20 Write test for CLI flag resolution
+  - [x] 3.21 Write test for OR variable priority (first match wins)
+  - [x] 3.22 Write test for missing variable error messages
+  - [x] 3.23 Write test for stdin rejection when no {{input}} exists
+  - [x] 3.24 Write test for file path resolution and reading
+  - [x] 3.25 Run all resolver tests and verify they pass
+
+- [x] 4.0 Integrate AI client and implement instruction execution
+  - [x] 4.1 [depends on: 3.0] Create internal/ai/client.go with Client struct
+  - [x] 4.2 Add APIKey and Model fields to Client struct
+  - [x] 4.3 Implement Complete() method to call Anthropic API endpoint
+  - [x] 4.4 Set required HTTP headers (x-api-key, anthropic-version: 2023-06-01)
+  - [x] 4.5 Build request body with model, max_tokens, and messages array
+  - [x] 4.6 Implement response streaming to stdout using bufio.Scanner
+  - [x] 4.7 Add error handling for missing ANTHROPIC_API_KEY environment variable
+  - [x] 4.8 Add error handling for API errors and network failures
+  - [x] 4.9 Test AI client with simple prompt using go run
+  - [x] 4.10 Create cmd/run.go or implement as default command in root.go
+  - [x] 4.11 Add instruction name validation with cobra.MinimumNArgs(1)
+  - [x] 4.12 Implement ExecuteInstruction() function that wires all components
+  - [x] 4.13 Add instruction loading via instruction.Load()
+  - [x] 4.14 Add variable parsing via instruction.ParseVariables()
+  - [x] 4.15 Implement stdin detection using os.Stdin.Stat() mode check
+  - [x] 4.16 Implement stdin reading with ioutil.ReadAll()
+  - [x] 4.17 Implement dynamic flag parsing based on parsed variables
+  - [x] 4.18 Call resolver.Resolve() to get variable values
+  - [x] 4.19 Implement variable replacement in system.txt with resolved values
+  - [x] 4.20 Call AI client with final prompt
+  - [x] 4.21 Add --output flag to save response to file
+  - [x] 4.22 Test execution with stdin input (echo "test" | ./gliik instruction_name)
+  - [x] 4.23 Test execution with CLI flags (./gliik instruction_name --var value)
+  - [x] 4.24 Test execution with file path flag (./gliik instruction_name --var file.txt)
+  - [x] 4.25 Test execution with --output flag
+  - [x] 4.26 Test error cases (missing variables, no API key, invalid instruction)
+
+- [x] 5.0 Add version management and polish for production
+  - [x] 5.1 [depends on: 2.0] Create cmd/version.go with subcommands (show, bump, set)
+  - [x] 5.2 Create internal/instruction/version.go with GetVersion() function
+  - [x] 5.3 Implement BumpVersion() function with semver parsing and patch increment
+  - [x] 5.4 Implement SetVersion() function with semver validation (regex: `^\d+\.\d+\.\d+$`)
+  - [x] 5.5 Implement atomic meta.yaml updates for version changes
+  - [x] 5.6 Test version command shows current version
+  - [x] 5.7 Test version bump increments patch number correctly
+  - [x] 5.8 Test version set with custom version number
+  - [x] 5.9 Review all error messages and add helpful suggestions and examples
+  - [x] 5.10 Add instruction name format validation across all commands
+  - [x] 5.11 Add file path validation for config and instruction directories
+  - [x] 5.12 Add API key presence validation before AI calls
+  - [x] 5.13 Add comprehensive help text to all commands using Cobra's Long and Example fields
+  - [x] 5.14 Test edge cases: missing directories, corrupted YAML, empty instructions
+  - [x] 5.15 Test network failure scenarios and error messages
+  - [x] 5.16 Create README.md with installation instructions
+  - [x] 5.17 Add quick start guide to README.md
+  - [x] 5.18 Add usage examples to README.md for all commands
+  - [x] 5.19 Add troubleshooting section to README.md
+
+- [ ] 6.0 Create build system and release artifacts
+  - [ ] 6.1 [depends on: 5.0] Create build.sh script for cross-platform builds
+  - [ ] 6.2 Add Darwin/AMD64 build target to build script
+  - [ ] 6.3 Add Linux/AMD64 build target to build script
+  - [ ] 6.4 Add Windows/AMD64 build target to build script
+  - [ ] 6.5 Add Darwin/ARM64 (Apple Silicon) build target to build script
+  - [ ] 6.6 Make build script executable with chmod +x build.sh
+  - [ ] 6.7 Test build script produces all platform binaries
+  - [ ] 6.8 Update README.md with installation instructions for each platform
+  - [ ] 6.9 Add manual installation steps (download binary, make executable, move to PATH)
+  - [ ] 6.10 Create git tag v0.1.0 for initial release
+  - [ ] 6.11 Optional: Create .github/workflows/release.yml for automated builds
+  - [ ] 6.12 Verify all binaries work on respective platforms

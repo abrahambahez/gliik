@@ -1,3 +1,5 @@
 .DS_Store
 **/.zk*
 .obsidian**
+CLAUDE.md
+.claude/*
