@@ -1,6 +1,7 @@
 package instruction
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -12,9 +13,10 @@ type Variable struct {
 
 var variableRegex = regexp.MustCompile(`\{\{([^}]+)\}\}`)
 
-func ParseVariables(systemText string) []Variable {
+func ParseVariables(systemText string) ([]Variable, error) {
 	matches := variableRegex.FindAllStringSubmatch(systemText, -1)
 	var variables []Variable
+	seen := make(map[string]bool)
 
 	for _, match := range matches {
 		if len(match) < 2 {
@@ -23,6 +25,11 @@ func ParseVariables(systemText string) []Variable {
 
 		raw := match[0]
 		content := match[1]
+
+		if seen[raw] {
+			return nil, fmt.Errorf("duplicate variable in instruction: %s\n\nEach variable must appear only once in system.txt\nPlease remove duplicate occurrences", raw)
+		}
+		seen[raw] = true
 
 		options := strings.Split(content, "|")
 		for i := range options {
@@ -35,5 +42,5 @@ func ParseVariables(systemText string) []Variable {
 		})
 	}
 
-	return variables
+	return variables, nil
 }

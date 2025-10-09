@@ -1,12 +1,16 @@
 package instruction
 
 import (
+	"strings"
 	"testing"
 )
 
 func TestParseVariables_Simple(t *testing.T) {
 	text := "Process this {{text}}"
-	vars := ParseVariables(text)
+	vars, err := ParseVariables(text)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if len(vars) != 1 {
 		t.Fatalf("expected 1 variable, got %d", len(vars))
@@ -27,7 +31,10 @@ func TestParseVariables_Simple(t *testing.T) {
 
 func TestParseVariables_OR(t *testing.T) {
 	text := "Process {{input|text}}"
-	vars := ParseVariables(text)
+	vars, err := ParseVariables(text)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if len(vars) != 1 {
 		t.Fatalf("expected 1 variable, got %d", len(vars))
@@ -52,7 +59,10 @@ func TestParseVariables_OR(t *testing.T) {
 
 func TestParseVariables_Multiple(t *testing.T) {
 	text := "Process {{job}} and {{input|resume}}"
-	vars := ParseVariables(text)
+	vars, err := ParseVariables(text)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	if len(vars) != 2 {
 		t.Fatalf("expected 2 variables, got %d", len(vars))
@@ -89,7 +99,10 @@ func TestParseVariables_EdgeCases(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			vars := ParseVariables(tc.text)
+			vars, err := ParseVariables(tc.text)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(vars) != tc.expected {
 				t.Errorf("expected %d variables, got %d", tc.expected, len(vars))
 			}
@@ -104,5 +117,19 @@ func TestParseVariables_EdgeCases(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestParseVariables_Duplicate(t *testing.T) {
+	text := "Process {{text}} and then {{text}} again"
+	_, err := ParseVariables(text)
+
+	if err == nil {
+		t.Fatal("expected error for duplicate variable, got nil")
+	}
+
+	expectedMsg := "duplicate variable in instruction: {{text}}"
+	if !strings.Contains(err.Error(), expectedMsg) {
+		t.Errorf("expected error message to contain '%s', got '%s'", expectedMsg, err.Error())
 	}
 }

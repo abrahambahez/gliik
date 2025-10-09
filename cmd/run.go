@@ -31,7 +31,10 @@ var runCmd = &cobra.Command{
 			return err
 		}
 
-		variables := instruction.ParseVariables(inst.SystemText)
+		variables, err := instruction.ParseVariables(inst.SystemText)
+		if err != nil {
+			return err
+		}
 
 		tempCmd := &cobra.Command{}
 		tempCmd.Flags().StringVarP(&outputFile, "output", "o", "", "Write output to file")
@@ -58,7 +61,10 @@ func executeInstruction(name string, cmd *cobra.Command) error {
 		return err
 	}
 
-	variables := instruction.ParseVariables(inst.SystemText)
+	variables, err := instruction.ParseVariables(inst.SystemText)
+	if err != nil {
+		return err
+	}
 
 	stdin := ""
 	stat, _ := os.Stdin.Stat()
