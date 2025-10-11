@@ -31,6 +31,14 @@ func Load(name string) (*Instruction, error) {
 		return nil, fmt.Errorf("failed to parse meta.yaml: %w", err)
 	}
 
+	if len(meta.Tags) == 0 {
+		fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'tags' in meta.yaml\n", name)
+	}
+
+	if meta.Lang == "" {
+		fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'lang' in meta.yaml\n", name)
+	}
+
 	systemFile := filepath.Join(instructionDir, "system.txt")
 	systemText, err := os.ReadFile(systemFile)
 	if err != nil {

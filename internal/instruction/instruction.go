@@ -8,6 +8,8 @@ type Instruction struct {
 }
 
 type Meta struct {
-	Version     string `yaml:"version"`
-	Description string `yaml:"description"`
+	Version     string   `yaml:"version"`
+	Description string   `yaml:"description"`
+	Tags        []string `yaml:"tags"`
+	Lang        string   `yaml:"lang"`
 }

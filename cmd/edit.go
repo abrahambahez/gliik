@@ -23,7 +23,12 @@ var editCmd = &cobra.Command{
 			return err
 		}
 
-		systemFile := filepath.Join(inst.Path, "system.txt")
+		fileName := "system.txt"
+		if editMeta, _ := cmd.Flags().GetBool("meta"); editMeta {
+			fileName = "meta.yaml"
+		}
+
+		systemFile := filepath.Join(inst.Path, fileName)
 
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
@@ -44,5 +49,6 @@ var editCmd = &cobra.Command{
 }
 
 func init() {
+	editCmd.Flags().Bool("meta", false, "Edit meta.yaml instead of system.txt")
 	rootCmd.AddCommand(editCmd)
 }

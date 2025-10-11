@@ -23,8 +23,38 @@ func ValidateName(name string) error {
 	return nil
 }
 
-func Create(name, description string) error {
+func ValidateLanguageCode(lang string) error {
+	validLangRegex := regexp.MustCompile(`^[a-z]{2}$`)
+	if !validLangRegex.MatchString(lang) {
+		return fmt.Errorf("invalid language code '%s': must be ISO 639-1 two-letter lowercase code (e.g., 'en', 'es', 'fr')", lang)
+	}
+	return nil
+}
+
+func ValidateTags(tags []string) error {
+	if len(tags) == 0 {
+		return fmt.Errorf("at least one tag is required")
+	}
+
+	validTagRegex := regexp.MustCompile(`^[a-z0-9-]+$`)
+	for _, tag := range tags {
+		if !validTagRegex.MatchString(tag) {
+			return fmt.Errorf("invalid tag '%s': must be lowercase alphanumeric with hyphens only", tag)
+		}
+	}
+	return nil
+}
+
+func Create(name, description string, tags []string, lang string) error {
 	if err := ValidateName(name); err != nil {
+		return err
+	}
+
+	if err := ValidateTags(tags); err != nil {
+		return err
+	}
+
+	if err := ValidateLanguageCode(lang); err != nil {
 		return err
 	}
 
@@ -46,6 +76,8 @@ func Create(name, description string) error {
 	meta := Meta{
 		Version:     "0.1.0",
 		Description: description,
+		Tags:        tags,
+		Lang:        lang,
 	}
 
 	metaData, err := yaml.Marshal(&meta)

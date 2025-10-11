@@ -2,8 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"text/tabwriter"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/yourusername/gliik/internal/instruction"
@@ -24,14 +23,15 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "NAME\tVERSION\tDESCRIPTION")
-
 		for _, inst := range instructions {
-			fmt.Fprintf(w, "%s\t%s\t%s\n", inst.Name, inst.Meta.Version, inst.Meta.Description)
+			tags := strings.Join(inst.Meta.Tags, ", ")
+			fmt.Printf("%s v%s [%s] - %s\n\n",
+				inst.Name,
+				inst.Meta.Version,
+				tags,
+				inst.Meta.Description)
 		}
 
-		w.Flush()
 		return nil
 	},
 }
