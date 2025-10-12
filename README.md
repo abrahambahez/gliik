@@ -174,6 +174,21 @@ editor: vim
 - `ANTHROPIC_API_KEY` - Your Anthropic API key (required)
 - `EDITOR` - Text editor for editing instructions (default: vim)
 
+## Tools
+
+Tools are prototypes for advanced usage of Gliik.
+
+### gliik-chain - Intelligent Context Selection
+
+Execute instructions with automatic context file selection.
+
+**Installation:**
+```bash
+# Add to PATH
+sudo ln -s $(pwd)/tools/gliik-chain.sh /usr/local/bin/gliik-chain
+
+# Or use directly
+./tools/gliik-chain.sh context.md instruction_name
 ## Examples
 
 ### Code Review Instruction
