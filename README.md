@@ -3,11 +3,12 @@
 A CLI tool for managing and executing AI prompts (called "instructions") following UNIX philosophy: composability, minimalism, and clear separation of concerns.
 
 >[!note]
-> This is an early version. Currently only supports Claude via Anthropic API.
+> This is an early version. Supports both Anthropic Claude (cloud) and Ollama (local) providers.
 >
 
 ## Features
 
+- **Multiple AI providers**: Anthropic Claude (cloud) or Ollama (local)
 - Store reusable AI prompts as instructions
 - **Markdown-based format** with YAML frontmatter for metadata
 - Variable substitution with `{{variable}}` syntax
@@ -17,13 +18,15 @@ A CLI tool for managing and executing AI prompts (called "instructions") followi
 - Version management for instructions
 - Simple, composable commands
 - Rich formatting support (headers, lists, code blocks, etc.)
+- Streaming responses for real-time output
 
 ## Installation
 
 ### Prerequisites
 
 - Go 1.24 or later
-- Anthropic API key via ENV variable
+- **For Anthropic provider**: Anthropic API key (set as `ANTHROPIC_API_KEY` env variable)
+- **For Ollama provider**: Ollama installed and running locally ([ollama.com](https://ollama.com))
 
 ### Build from Source
 
@@ -52,12 +55,33 @@ mv gliik ~/bin/
 gliik init
 ```
 
-2. Set your Anthropic API key:
-```bash
-export ANTHROPIC_API_KEY="your-api-key-here"
-```
+2. **Choose your AI provider** by editing `~/.config/gliik/config.yaml`:
 
-Add this to your `~/.bashrc` or `~/.zshrc` to persist.
+   **Option A: Anthropic Claude (default)**
+   ```yaml
+   provider: anthropic
+   anthropic:
+     model: claude-sonnet-4-20250514
+   ```
+   Then set your API key:
+   ```bash
+   export ANTHROPIC_API_KEY="your-api-key-here"
+   ```
+
+   **Option B: Ollama (local)**
+   ```yaml
+   provider: ollama
+   ollama:
+     endpoint: http://localhost:11434
+     model: llama3.2
+   ```
+   Make sure Ollama is running:
+   ```bash
+   ollama serve
+   ollama pull llama3.2
+   ```
+
+Add the `export` to your `~/.bashrc` or `~/.zshrc` to persist the API key.
 
 ## Quick Start
 
@@ -101,12 +125,6 @@ gliik run summarize --text "Long text to summarize..."
 
 ```bash
 gliik run summarize --text article.txt
-```
-
-### Save Output
-
-```bash
-gliik run summarize --text article.txt --output summary.txt
 ```
 
 ## Commands
@@ -188,16 +206,32 @@ With {{variable}} substitution support.
 
 ## Configuration
 
-Located at `~/.gliik/config.yaml`:
+Located at `~/.config/gliik/config.yaml`:
 
 ```yaml
 default_model: claude-sonnet-4-20250514
 editor: vim
+instructions_dir: ~/.gliik/instructions  # Optional: custom instructions directory
+provider: anthropic  # or "ollama"
+
+# Provider-specific configuration
+anthropic:
+  model: claude-sonnet-4-20250514
+
+ollama:
+  endpoint: http://localhost:11434
+  model: llama3.2
 ```
+
+**Configuration options:**
+- `provider`: Choose between `"anthropic"` (cloud) or `"ollama"` (local)
+- `anthropic.model`: Which Claude model to use
+- `ollama.endpoint`: Ollama server URL (default: `http://localhost:11434`)
+- `ollama.model`: Which Ollama model to use (run `ollama list` to see available models)
 
 ## Environment Variables
 
-- `ANTHROPIC_API_KEY` - Your Anthropic API key (required)
+- `ANTHROPIC_API_KEY` - Your Anthropic API key (required only when using `provider: anthropic`)
 - `EDITOR` - Text editor for editing instructions (default: vim)
 
 ## Examples

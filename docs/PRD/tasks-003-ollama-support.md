@@ -18,54 +18,63 @@
 
 ## Tasks
 
-- [ ] 1.0 Create provider abstraction layer
-  - [ ] 1.1 Create `internal/provider/` directory
-  - [ ] 1.2 Create `provider.go` with `LLMProvider` interface definition
-  - [ ] 1.3 Define `StreamCompletion(systemPrompt, userMessage string) error` method signature
-  - [ ] 1.4 Add Godoc documentation explaining the provider abstraction pattern
+- [x] 1.0 Create provider abstraction layer
+  - [x] 1.1 Create `internal/provider/` directory
+  - [x] 1.2 Create `provider.go` with `LLMProvider` interface definition
+  - [x] 1.3 Define `StreamCompletion(systemPrompt, userMessage string) error` method signature
+  - [x] 1.4 Add Godoc documentation explaining the provider abstraction pattern
 
-- [ ] 2.0 Update configuration to support provider selection
-  - [ ] 2.1 Add `Provider string` field to `Config` struct in `internal/config/init.go`
-  - [ ] 2.2 Add `yaml:"provider"` tag to Provider field
-  - [ ] 2.3 Create `ValidateProvider()` method that checks value is "anthropic" or "ollama"
-  - [ ] 2.4 Update `Initialize()` to set default `provider: "anthropic"` in config.yaml
-  - [ ] 2.5 Add Godoc for Provider field explaining valid values
+- [x] 2.0 Update configuration to support provider selection
+  - [x] 2.1 Add `Provider string` field to `Config` struct in `internal/config/init.go`
+  - [x] 2.2 Add `yaml:"provider"` tag to Provider field
+  - [x] 2.3 Create `ValidateProvider()` method that checks value is "anthropic" or "ollama"
+  - [x] 2.4 Update `Initialize()` to set default `provider: "anthropic"` in config.yaml
+  - [x] 2.5 Add Godoc for Provider field explaining valid values
+  - [x] 2.6 Add `AnthropicConfig` struct with `Model` field to `Config` struct
+  - [x] 2.7 Add `OllamaConfig` struct with `Endpoint` and `Model` fields to `Config` struct
+  - [x] 2.8 Add `yaml:"anthropic"` and `yaml:"ollama"` tags to provider config fields
+  - [x] 2.9 Update `Initialize()` to set default anthropic and ollama config sections
+  - [x] 2.10 Add Godoc for provider config structs explaining their purpose
 
-- [ ] 3.0 Refactor Anthropic client into provider implementation
-  - [ ] 3.1 [depends on: 1.0] Create `internal/provider/anthropic.go` file
-  - [ ] 3.2 [depends on: 3.1] Copy `Client` struct from `ai/client.go` and rename to `AnthropicProvider`
-  - [ ] 3.3 [depends on: 3.2] Copy `NewClient()` function and rename to `NewAnthropicProvider()`
-  - [ ] 3.4 [depends on: 3.3] Copy `Complete()` method and rename to `StreamCompletion()`
-  - [ ] 3.5 [depends on: 3.4] Update `StreamCompletion()` signature to match interface (systemPrompt, userMessage)
-  - [ ] 3.6 [depends on: 3.5] Update method to combine systemPrompt and userMessage into messages array
-  - [ ] 3.7 [depends on: 3.6] Add Godoc documentation for `AnthropicProvider` struct and methods
-  - [ ] 3.8 [depends on: 3.7] Verify AnthropicProvider implements LLMProvider interface
+- [x] 3.0 Refactor Anthropic client into provider implementation
+  - [x] 3.1 [depends on: 1.0] Create `internal/provider/anthropic.go` file
+  - [x] 3.2 [depends on: 3.1] Copy `Client` struct from `ai/client.go` and rename to `AnthropicProvider`
+  - [x] 3.3 [depends on: 3.2] Copy `NewClient()` function and rename to `NewAnthropicProvider()`
+  - [x] 3.4 [depends on: 3.3] Copy `Complete()` method and rename to `StreamCompletion()`
+  - [x] 3.5 [depends on: 3.4] Update `StreamCompletion()` signature to match interface (systemPrompt, userMessage)
+  - [x] 3.6 [depends on: 3.5] Update method to combine systemPrompt and userMessage into messages array
+  - [x] 3.7 [depends on: 3.6] Add Godoc documentation for `AnthropicProvider` struct and methods
+  - [x] 3.8 [depends on: 3.7] Verify AnthropicProvider implements LLMProvider interface
+  - [x] 3.9 [depends on: 2.6] Update `NewAnthropicProvider()` to accept model parameter
+  - [x] 3.10 [depends on: 3.9] Remove hardcoded model, use parameter instead
 
-- [ ] 4.0 Implement Ollama provider
-  - [ ] 4.1 [depends on: 1.0] Create `internal/provider/ollama.go` file
-  - [ ] 4.2 [depends on: 4.1] Define `OllamaProvider` struct with `Endpoint` and `Model` fields
-  - [ ] 4.3 [depends on: 4.2] Implement `NewOllamaProvider()` constructor with hardcoded defaults
-  - [ ] 4.4 [depends on: 4.3] Set default endpoint to `http://localhost:11434` and model to `llama3.2`
-  - [ ] 4.5 [depends on: 4.4] Implement `StreamCompletion(systemPrompt, userMessage string) error` method
-  - [ ] 4.6 [depends on: 4.5] Build JSON request body with model, prompt (combined system+user), and stream:true
-  - [ ] 4.7 [depends on: 4.6] Create HTTP POST request to `{endpoint}/api/generate`
-  - [ ] 4.8 [depends on: 4.7] Set Content-Type header to `application/json`
-  - [ ] 4.9 [depends on: 4.8] Execute request and handle connection errors with specific error message from PRD
-  - [ ] 4.10 [depends on: 4.9] Implement newline-delimited JSON streaming response parser
-  - [ ] 4.11 [depends on: 4.10] For each line, parse JSON and extract `response` field, write to stdout
-  - [ ] 4.12 [depends on: 4.11] Stop parsing when `done: true` is received
-  - [ ] 4.13 [depends on: 4.12] Add Godoc documentation for OllamaProvider struct and methods
-  - [ ] 4.14 [depends on: 4.13] Verify OllamaProvider implements LLMProvider interface
+- [x] 4.0 Implement Ollama provider
+  - [x] 4.1 [depends on: 1.0] Create `internal/provider/ollama.go` file
+  - [x] 4.2 [depends on: 4.1] Define `OllamaProvider` struct with `Endpoint` and `Model` fields
+  - [x] 4.3 [depends on: 2.7] Update `NewOllamaProvider()` to accept endpoint and model parameters
+  - [x] 4.4 [depends on: 4.3] Remove hardcoded defaults, use parameters instead
+  - [x] 4.5 [depends on: 4.4] Implement `StreamCompletion(systemPrompt, userMessage string) error` method
+  - [x] 4.6 [depends on: 4.5] Build JSON request body with model, prompt (combined system+user), and stream:true
+  - [x] 4.7 [depends on: 4.6] Create HTTP POST request to `{endpoint}/api/generate`
+  - [x] 4.8 [depends on: 4.7] Set Content-Type header to `application/json`
+  - [x] 4.9 [depends on: 4.8] Execute request and handle connection errors with specific error message from PRD
+  - [x] 4.10 [depends on: 4.9] Implement newline-delimited JSON streaming response parser
+  - [x] 4.11 [depends on: 4.10] For each line, parse JSON and extract `response` field, write to stdout
+  - [x] 4.12 [depends on: 4.11] Stop parsing when `done: true` is received
+  - [x] 4.13 [depends on: 4.12] Add Godoc documentation for OllamaProvider struct and methods
+  - [x] 4.14 [depends on: 4.13] Verify OllamaProvider implements LLMProvider interface
 
-- [ ] 5.0 Update run command to use provider abstraction
-  - [ ] 5.1 [depends on: 3.0, 4.0] Import `internal/provider` package in `cmd/run.go`
-  - [ ] 5.2 [depends on: 5.1] Import `internal/config` package in `cmd/run.go`
-  - [ ] 5.3 [depends on: 5.2] Update `executeInstruction()` to call `config.Load()` to get config
-  - [ ] 5.4 [depends on: 5.3] Add provider selection logic: if config.Provider == "ollama" use Ollama, else Anthropic
-  - [ ] 5.5 [depends on: 5.4] Instantiate correct provider based on selection
-  - [ ] 5.6 [depends on: 5.5] Replace `aiClient.Complete()` call with `provider.StreamCompletion()`
-  - [ ] 5.7 [depends on: 5.6] Pass empty string for systemPrompt and finalPrompt for userMessage
-  - [ ] 5.8 [depends on: 5.7] Remove direct dependency on `internal/ai` package
-  - [ ] 5.9 [depends on: 5.8] Test with Anthropic provider (default config)
-  - [ ] 5.10 [depends on: 5.9] Test with Ollama provider (set `provider: ollama` in config.yaml)
-  - [ ] 5.11 [depends on: 5.10] Test error handling when Ollama is not running
+- [x] 5.0 Update run command to use provider abstraction
+  - [x] 5.1 [depends on: 3.0, 4.0] Import `internal/provider` package in `cmd/run.go`
+  - [x] 5.2 [depends on: 5.1] Import `internal/config` package in `cmd/run.go`
+  - [x] 5.3 [depends on: 5.2] Update `executeInstruction()` to call `config.Load()` to get config
+  - [x] 5.4 [depends on: 5.3] Add provider selection logic: if config.Provider == "ollama" use Ollama, else Anthropic
+  - [x] 5.5 [depends on: 5.4] Instantiate Anthropic provider with model from config.Anthropic.Model
+  - [x] 5.6 [depends on: 5.5] Instantiate Ollama provider with endpoint and model from config.Ollama
+  - [x] 5.7 [depends on: 5.6] Add fallback defaults if config sections are missing
+  - [x] 5.8 [depends on: 5.7] Replace `aiClient.Complete()` call with `provider.StreamCompletion()`
+  - [x] 5.9 [depends on: 5.8] Pass empty string for systemPrompt and finalPrompt for userMessage
+  - [x] 5.10 [depends on: 5.9] Remove direct dependency on `internal/ai` package
+  - [x] 5.11 [depends on: 5.10] Test with Anthropic provider (default config)
+  - [x] 5.12 [depends on: 5.11] Test with Ollama provider (set `provider: ollama` in config.yaml)
+  - [x] 5.13 [depends on: 5.12] Test error handling when Ollama is not running

@@ -7,11 +7,10 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/yourusername/gliik/internal/ai"
+	"github.com/yourusername/gliik/internal/config"
 	"github.com/yourusername/gliik/internal/instruction"
+	"github.com/yourusername/gliik/internal/provider"
 )
-
-var outputFile string
 
 var runCmd = &cobra.Command{
 	Use:                "run <instruction>",
@@ -37,7 +36,6 @@ var runCmd = &cobra.Command{
 		}
 
 		tempCmd := &cobra.Command{}
-		tempCmd.Flags().StringVarP(&outputFile, "output", "o", "", "Write output to file")
 
 		for _, v := range variables {
 			for _, opt := range v.Options {
@@ -56,6 +54,11 @@ var runCmd = &cobra.Command{
 }
 
 func executeInstruction(name string, cmd *cobra.Command) error {
+	cfg, err := config.Load()
+	if err != nil {
+		return err
+	}
+
 	inst, err := instruction.Load(name)
 	if err != nil {
 		return err
@@ -105,22 +108,31 @@ func executeInstruction(name string, cmd *cobra.Command) error {
 		finalPrompt = strings.ReplaceAll(finalPrompt, varRaw, value)
 	}
 
-	aiClient, err := ai.NewClient()
-	if err != nil {
-		return err
-	}
+	var llmProvider provider.LLMProvider
 
-	response, err := aiClient.Complete(finalPrompt)
-	if err != nil {
-		return err
-	}
-
-	fmt.Print(response)
-
-	if outputFile != "" {
-		if err := os.WriteFile(outputFile, []byte(response), 0644); err != nil {
-			return fmt.Errorf("failed to write output file: %w", err)
+	if cfg.Provider == "ollama" {
+		endpoint := cfg.Ollama.Endpoint
+		if endpoint == "" {
+			endpoint = "http://localhost:11434"
 		}
+		model := cfg.Ollama.Model
+		if model == "" {
+			model = "llama3.2"
+		}
+		llmProvider = provider.NewOllamaProvider(endpoint, model)
+	} else {
+		model := cfg.Anthropic.Model
+		if model == "" {
+			model = "claude-sonnet-4-20250514"
+		}
+		llmProvider, err = provider.NewAnthropicProvider(model)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := llmProvider.StreamCompletion("", finalPrompt); err != nil {
+		return err
 	}
 
 	return nil

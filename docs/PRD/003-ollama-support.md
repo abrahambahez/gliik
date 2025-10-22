@@ -34,47 +34,60 @@ Currently, Gliik only supports Anthropic's Claude API for executing AI instructi
 2. The system must default to `"anthropic"` if no provider is specified (backward compatibility)
 3. When `provider` is set to `"ollama"`, the system must use Ollama endpoint instead of Anthropic API
 4. The system must validate the provider value and error if it's not `"anthropic"` or `"ollama"`
+5. The system must add provider-specific configuration sections:
+   ```yaml
+   provider: anthropic
+
+   anthropic:
+     model: claude-sonnet-4-20250514
+
+   ollama:
+     endpoint: http://localhost:11434
+     model: llama3.2
+   ```
+6. The system must read model and endpoint from the appropriate config section based on selected provider
+7. The system must provide sensible defaults if provider sections are missing
 
 ### Ollama Integration
 
-5. The system must send requests to Ollama's `/api/generate` endpoint
-6. The system must use the endpoint `http://localhost:11434` for Ollama (hardcoded default)
-7. The system must use a default Ollama model `llama3.2` (hardcoded default)
-8. The system must format prompts for Ollama as a single combined string (system + user content)
-9. The system must handle Ollama's newline-delimited JSON streaming responses
-10. The system must stream Ollama responses to stdout in real-time (matching current Anthropic behavior)
+8. The system must send requests to Ollama's `/api/generate` endpoint
+9. The system must read the endpoint from `config.ollama.endpoint` (default: `http://localhost:11434`)
+10. The system must read the model from `config.ollama.model` (default: `llama3.2`)
+11. The system must format prompts for Ollama as a single combined string (system + user content)
+12. The system must handle Ollama's newline-delimited JSON streaming responses
+13. The system must stream Ollama responses to stdout in real-time (matching current Anthropic behavior)
 
 ### Error Handling
 
-11. If Ollama provider is selected but the endpoint is unreachable, the system must display:
+14. If Ollama provider is selected but the endpoint is unreachable, the system must display:
     ```
     Error: Cannot connect to Ollama
 
     Make sure Ollama is running:
       ollama serve
 
-    Default endpoint: http://localhost:11434
+    Configured endpoint: <endpoint from config>
     ```
-12. The system must not fall back to Anthropic automatically (fail fast)
-13. The system must preserve existing Anthropic error handling without changes
+15. The system must not fall back to Anthropic automatically (fail fast)
+16. The system must preserve existing Anthropic error handling without changes
 
 ### Code Architecture
 
-14. The system must create an abstraction layer for LLM providers (interface or similar pattern)
-15. The system must refactor existing Anthropic code into a provider implementation
-16. The system must implement a new Ollama provider following the same interface
-17. The system must use only Go standard library for HTTP calls to Ollama (no new dependencies)
+17. The system must create an abstraction layer for LLM providers (interface or similar pattern)
+18. The system must refactor existing Anthropic code into a provider implementation
+19. The system must implement a new Ollama provider following the same interface
+20. The system must use only Go standard library for HTTP calls to Ollama (no new dependencies)
+21. Provider constructors must accept configuration parameters (model, endpoint) from config.yaml
 
 ## Non-Goals (Out of Scope)
 
-1. **Custom Ollama endpoints:** Hardcode `http://localhost:11434`, no user configuration
-2. **Custom models per instruction:** Use single default model for all instructions
-3. **Model validation:** No checks for whether specified model exists in Ollama
-4. **Ollama installation detection:** Assume user has installed Ollama if they configure it
-5. **Multiple provider support per execution:** Cannot mix providers in single run
-6. **Per-instruction provider override:** Cannot specify provider in meta.yaml
-7. **Anthropic and Ollama automatic fallback:** No automatic switching between providers
-8. **Model management:** No `gliik` commands to list/pull/manage Ollama models
+1. **Custom models per instruction:** Use single global model for all instructions (no per-instruction override)
+2. **Model validation:** No checks for whether specified model exists in Ollama
+3. **Ollama installation detection:** Assume user has installed Ollama if they configure it
+4. **Multiple provider support per execution:** Cannot mix providers in single run
+5. **Per-instruction provider override:** Cannot specify provider in instruction.md frontmatter
+6. **Anthropic and Ollama automatic fallback:** No automatic switching between providers
+7. **Model management:** No `gliik` commands to list/pull/manage Ollama models
 
 ## Technical Considerations
 
