@@ -9,12 +9,14 @@ A CLI tool for managing and executing AI prompts (called "instructions") followi
 ## Features
 
 - Store reusable AI prompts as instructions
+- **Markdown-based format** with YAML frontmatter for metadata
 - Variable substitution with `{{variable}}` syntax
 - OR logic for flexible input: `{{input|text}}`
 - Pipe stdin or use CLI flags
 - File path support for variables
 - Version management for instructions
 - Simple, composable commands
+- Rich formatting support (headers, lists, code blocks, etc.)
 
 ## Installation
 
@@ -62,12 +64,22 @@ Add this to your `~/.bashrc` or `~/.zshrc` to persist.
 ### Create an Instruction
 
 ```bash
-gliik add summarize -d "Summarize text"
-# Opens editor to edit system.txt
+gliik add summarize -d "Summarize text" -t summary -t text -l en
+# Opens editor to edit instruction.md
 ```
 
-In the editor, write your prompt:
-```
+In the editor, you'll see a template with frontmatter and markdown body:
+```markdown
+---
+version: "0.1.0"
+description: "Summarize text"
+tags:
+  - summary
+  - text
+lang: "en"
+---
+# summarize
+
 Please summarize the following text in one sentence:
 
 {{input|text}}
@@ -109,7 +121,7 @@ Create a new instruction and open in editor
 List all instructions with versions and descriptions
 
 ### `gliik edit <name>`
-Edit an instruction's system.txt file
+Edit an instruction's instruction.md file
 
 ### `gliik run <name> [flags]`
 Execute an instruction with AI
@@ -156,8 +168,22 @@ The `input` option is reserved for stdin only:
 ├── config.yaml          # Configuration
 └── instructions/
     └── <name>/
-        ├── system.txt   # Prompt template
-        └── meta.yaml    # Version and description
+        └── instruction.md   # Single file with YAML frontmatter + markdown body
+```
+
+Each `instruction.md` follows this format:
+```markdown
+---
+version: "1.0.0"
+description: "Brief description"
+tags:
+  - tag1
+  - tag2
+lang: "en"
+---
+# Your prompt content here
+
+With {{variable}} substitution support.
 ```
 
 ## Configuration
@@ -180,16 +206,27 @@ editor: vim
 
 Create:
 ```bash
-gliik add review -d "Review code for issues"
+gliik add review -d "Review code for issues" -t code-review -t development -l en
 ```
 
-system.txt:
-```
+instruction.md:
+```markdown
+---
+version: "0.1.0"
+description: "Review code for issues"
+tags:
+  - code-review
+  - development
+lang: "en"
+---
+# Code Review
+
 You are a code reviewer. Review the following code and provide feedback:
 
 {{input|code}}
 
-Focus on:
+## Focus Areas
+
 - Bugs and errors
 - Performance issues
 - Best practices
@@ -206,15 +243,28 @@ gliik run review --code main.go
 
 Create:
 ```bash
-gliik add tailor_resume -d "Tailor resume to job"
+gliik add tailor_resume -d "Tailor resume to job" -t career -t job-seeking -l en
 ```
 
-system.txt:
-```
+instruction.md:
+```markdown
+---
+version: "0.1.0"
+description: "Tailor resume to job"
+tags:
+  - career
+  - job-seeking
+lang: "en"
+---
+# Resume Tailoring
+
 Tailor this resume to match the job description:
 
-Resume: {{resume}}
-Job Description: {{job}}
+## Resume
+{{resume}}
+
+## Job Description
+{{job}}
 
 Provide suggestions for improvements.
 ```
@@ -231,6 +281,9 @@ gliik run tailor_resume --resume resume.pdf --job job_desc.txt
 - Use OR variables for flexibility: `{{input|text}}`
 - Version your instructions as you improve them
 - File paths are automatically detected and read
+- Leverage markdown formatting for better prompt organization (headers, lists, emphasis)
+- Use tags to categorize instructions for easier discovery
+- Frontmatter metadata is never sent to the LLM - only the markdown body
 
 ## License
 

@@ -13,7 +13,7 @@ import (
 var editCmd = &cobra.Command{
 	Use:   "edit <name>",
 	Short: "Edit an instruction",
-	Long:  `Opens the instruction's system.txt file in your editor.`,
+	Long:  `Opens the instruction's instruction.md file in your editor.`,
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
@@ -23,19 +23,14 @@ var editCmd = &cobra.Command{
 			return err
 		}
 
-		fileName := "system.txt"
-		if editMeta, _ := cmd.Flags().GetBool("meta"); editMeta {
-			fileName = "meta.yaml"
-		}
-
-		systemFile := filepath.Join(inst.Path, fileName)
+		instructionFile := filepath.Join(inst.Path, "instruction.md")
 
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
 			editor = "vim"
 		}
 
-		editorCmd := exec.Command(editor, systemFile)
+		editorCmd := exec.Command(editor, instructionFile)
 		editorCmd.Stdin = os.Stdin
 		editorCmd.Stdout = os.Stdout
 		editorCmd.Stderr = os.Stderr
@@ -49,6 +44,5 @@ var editCmd = &cobra.Command{
 }
 
 func init() {
-	editCmd.Flags().Bool("meta", false, "Edit meta.yaml instead of system.txt")
 	rootCmd.AddCommand(editCmd)
 }

@@ -133,3 +133,129 @@ func TestParseVariables_Duplicate(t *testing.T) {
 		t.Errorf("expected error message to contain '%s', got '%s'", expectedMsg, err.Error())
 	}
 }
+
+func TestParseVariables_MarkdownHeaders(t *testing.T) {
+	text := `# Header with {{title}}
+## Subheader with {{input|context}}
+### Process {{variable}}`
+
+	vars, err := ParseVariables(text)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(vars) != 3 {
+		t.Fatalf("expected 3 variables, got %d", len(vars))
+	}
+
+	if vars[0].Raw != "{{title}}" {
+		t.Errorf("expected first variable '{{title}}', got '%s'", vars[0].Raw)
+	}
+
+	if vars[1].Raw != "{{input|context}}" {
+		t.Errorf("expected second variable '{{input|context}}', got '%s'", vars[1].Raw)
+	}
+
+	if vars[2].Raw != "{{variable}}" {
+		t.Errorf("expected third variable '{{variable}}', got '%s'", vars[2].Raw)
+	}
+}
+
+func TestParseVariables_MarkdownLists(t *testing.T) {
+	text := `- Item with {{var1}}
+- Another item with {{var2|option}}
+1. Numbered item {{var3}}
+2. Second numbered {{input}}`
+
+	vars, err := ParseVariables(text)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(vars) != 4 {
+		t.Fatalf("expected 4 variables, got %d", len(vars))
+	}
+}
+
+func TestParseVariables_MarkdownFormatting(t *testing.T) {
+	text := `**Bold text with {{bold_var}}**
+*Italic with {{italic_var}}*
+***Bold italic {{combined}}***
+` + "`code with {{code_var}}`"
+
+	vars, err := ParseVariables(text)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(vars) != 4 {
+		t.Fatalf("expected 4 variables, got %d", len(vars))
+	}
+
+	expectedVars := []string{"{{bold_var}}", "{{italic_var}}", "{{combined}}", "{{code_var}}"}
+	for i, expected := range expectedVars {
+		if vars[i].Raw != expected {
+			t.Errorf("expected variable %d to be '%s', got '%s'", i, expected, vars[i].Raw)
+		}
+	}
+}
+
+func TestParseVariables_MarkdownCodeBlocks(t *testing.T) {
+	text := "```\ncode block with {{var1}}\n```\n\nRegular text {{var2}}\n\n```python\nfunction({{param}})\n```"
+
+	vars, err := ParseVariables(text)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(vars) != 3 {
+		t.Fatalf("expected 3 variables, got %d", len(vars))
+	}
+
+	if vars[0].Raw != "{{var1}}" {
+		t.Errorf("expected first variable '{{var1}}', got '%s'", vars[0].Raw)
+	}
+
+	if vars[1].Raw != "{{var2}}" {
+		t.Errorf("expected second variable '{{var2}}', got '%s'", vars[1].Raw)
+	}
+
+	if vars[2].Raw != "{{param}}" {
+		t.Errorf("expected third variable '{{param}}', got '%s'", vars[2].Raw)
+	}
+}
+
+func TestParseVariables_ComplexMarkdown(t *testing.T) {
+	text := `## PURPOSE
+
+You are an assistant for {{role}}.
+
+## PROCESS
+
+Follow these steps:
+
+1. Analyze the {{input|request}}
+2. Generate output for **{{output_type}}**
+3. Use ` + "`{{format}}`" + ` formatting
+
+### Notes
+
+- Important: *{{note}}*
+- See {{reference|doc}}`
+
+	vars, err := ParseVariables(text)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(vars) != 6 {
+		t.Fatalf("expected 6 variables, got %d", len(vars))
+	}
+
+	expectedVars := []string{"{{role}}", "{{input|request}}", "{{output_type}}", "{{format}}", "{{note}}", "{{reference|doc}}"}
+	for i, expected := range expectedVars {
+		if vars[i].Raw != expected {
+			t.Errorf("expected variable %d to be '%s', got '%s'", i, expected, vars[i].Raw)
+		}
+	}
+}
