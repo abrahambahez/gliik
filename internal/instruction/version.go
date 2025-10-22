@@ -20,16 +20,16 @@ func GetVersion(name string) (string, error) {
 	}
 
 	instructionDir := filepath.Join(config.GetInstructionsDir(), name)
-	metaFile := filepath.Join(instructionDir, "meta.yaml")
+	instructionFile := filepath.Join(instructionDir, "instruction.md")
 
-	metaData, err := os.ReadFile(metaFile)
+	instructionData, err := os.ReadFile(instructionFile)
 	if err != nil {
-		return "", fmt.Errorf("failed to read meta.yaml: %w", err)
+		return "", fmt.Errorf("failed to read instruction.md: %w", err)
 	}
 
-	var meta Meta
-	if err := yaml.Unmarshal(metaData, &meta); err != nil {
-		return "", fmt.Errorf("failed to parse meta.yaml: %w", err)
+	meta, _, err := ParseFrontmatter(string(instructionData))
+	if err != nil {
+		return "", fmt.Errorf("failed to parse instruction.md frontmatter: %w", err)
 	}
 
 	return meta.Version, nil
@@ -41,16 +41,16 @@ func BumpVersion(name, description string) (string, string, error) {
 	}
 
 	instructionDir := filepath.Join(config.GetInstructionsDir(), name)
-	metaFile := filepath.Join(instructionDir, "meta.yaml")
+	instructionFile := filepath.Join(instructionDir, "instruction.md")
 
-	metaData, err := os.ReadFile(metaFile)
+	instructionData, err := os.ReadFile(instructionFile)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to read meta.yaml: %w", err)
+		return "", "", fmt.Errorf("failed to read instruction.md: %w", err)
 	}
 
-	var meta Meta
-	if err := yaml.Unmarshal(metaData, &meta); err != nil {
-		return "", "", fmt.Errorf("failed to parse meta.yaml: %w", err)
+	meta, body, err := ParseFrontmatter(string(instructionData))
+	if err != nil {
+		return "", "", fmt.Errorf("failed to parse instruction.md frontmatter: %w", err)
 	}
 
 	oldVersion := meta.Version
@@ -66,11 +66,13 @@ func BumpVersion(name, description string) (string, string, error) {
 
 	newMetaData, err := yaml.Marshal(&meta)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to marshal meta.yaml: %w", err)
+		return "", "", fmt.Errorf("failed to marshal frontmatter: %w", err)
 	}
 
-	if err := os.WriteFile(metaFile, newMetaData, 0644); err != nil {
-		return "", "", fmt.Errorf("failed to write meta.yaml: %w", err)
+	instructionContent := fmt.Sprintf("---\n%s---\n%s", string(newMetaData), body)
+
+	if err := os.WriteFile(instructionFile, []byte(instructionContent), 0644); err != nil {
+		return "", "", fmt.Errorf("failed to write instruction.md: %w", err)
 	}
 
 	return oldVersion, newVersion, nil
@@ -86,16 +88,16 @@ func SetVersion(name, version, description string) (string, error) {
 	}
 
 	instructionDir := filepath.Join(config.GetInstructionsDir(), name)
-	metaFile := filepath.Join(instructionDir, "meta.yaml")
+	instructionFile := filepath.Join(instructionDir, "instruction.md")
 
-	metaData, err := os.ReadFile(metaFile)
+	instructionData, err := os.ReadFile(instructionFile)
 	if err != nil {
-		return "", fmt.Errorf("failed to read meta.yaml: %w", err)
+		return "", fmt.Errorf("failed to read instruction.md: %w", err)
 	}
 
-	var meta Meta
-	if err := yaml.Unmarshal(metaData, &meta); err != nil {
-		return "", fmt.Errorf("failed to parse meta.yaml: %w", err)
+	meta, body, err := ParseFrontmatter(string(instructionData))
+	if err != nil {
+		return "", fmt.Errorf("failed to parse instruction.md frontmatter: %w", err)
 	}
 
 	oldVersion := meta.Version
@@ -106,11 +108,13 @@ func SetVersion(name, version, description string) (string, error) {
 
 	newMetaData, err := yaml.Marshal(&meta)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal meta.yaml: %w", err)
+		return "", fmt.Errorf("failed to marshal frontmatter: %w", err)
 	}
 
-	if err := os.WriteFile(metaFile, newMetaData, 0644); err != nil {
-		return "", fmt.Errorf("failed to write meta.yaml: %w", err)
+	instructionContent := fmt.Sprintf("---\n%s---\n%s", string(newMetaData), body)
+
+	if err := os.WriteFile(instructionFile, []byte(instructionContent), 0644); err != nil {
+		return "", fmt.Errorf("failed to write instruction.md: %w", err)
 	}
 
 	return oldVersion, nil

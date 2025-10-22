@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/yourusername/gliik/internal/config"
-	"gopkg.in/yaml.v3"
 )
 
 func ListAll() ([]Instruction, error) {
@@ -26,24 +25,24 @@ func ListAll() ([]Instruction, error) {
 
 		name := entry.Name()
 		instructionPath := filepath.Join(instructionsDir, name)
-		metaFile := filepath.Join(instructionPath, "meta.yaml")
+		instructionFile := filepath.Join(instructionPath, "instruction.md")
 
-		metaData, err := os.ReadFile(metaFile)
+		instructionData, err := os.ReadFile(instructionFile)
 		if err != nil {
 			continue
 		}
 
-		var meta Meta
-		if err := yaml.Unmarshal(metaData, &meta); err != nil {
+		meta, _, err := ParseFrontmatter(string(instructionData))
+		if err != nil {
 			continue
 		}
 
 		if len(meta.Tags) == 0 {
-			fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'tags' in meta.yaml\n", name)
+			fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'tags' in frontmatter\n", name)
 		}
 
 		if meta.Lang == "" {
-			fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'lang' in meta.yaml\n", name)
+			fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'lang' in frontmatter\n", name)
 		}
 
 		instructions = append(instructions, Instruction{
