@@ -120,6 +120,19 @@ func executeInstruction(name string, cmd *cobra.Command) error {
 			model = "llama3.2"
 		}
 		llmProvider = provider.NewOllamaProvider(endpoint, model)
+	} else if cfg.Provider == "openai" {
+		endpoint := cfg.OpenAI.Endpoint
+		if endpoint == "" {
+			endpoint = "https://api.openai.com/v1"
+		}
+		model := cfg.OpenAI.Model
+		if model == "" {
+			model = "gpt-4o-mini"
+		}
+		llmProvider, err = provider.NewOpenAIProvider(endpoint, model)
+		if err != nil {
+			return err
+		}
 	} else {
 		model := cfg.Anthropic.Model
 		if model == "" {

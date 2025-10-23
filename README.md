@@ -3,12 +3,12 @@
 A CLI tool for managing and executing AI prompts (called "instructions") following UNIX philosophy: composability, minimalism, and clear separation of concerns.
 
 >[!note]
-> This is an early version. Supports both Anthropic Claude (cloud) and Ollama (local) providers.
+> This is an early version. Supports Anthropic Claude, OpenAI, and Ollama providers.
 >
 
 ## Features
 
-- **Multiple AI providers**: Anthropic Claude (cloud) or Ollama (local)
+- **Multiple AI providers**: Anthropic Claude, OpenAI, or Ollama (local)
 - Store reusable AI prompts as instructions
 - **Markdown-based format** with YAML frontmatter for metadata
 - Variable substitution with `{{variable}}` syntax
@@ -26,6 +26,7 @@ A CLI tool for managing and executing AI prompts (called "instructions") followi
 
 - Go 1.24 or later
 - **For Anthropic provider**: Anthropic API key (set as `ANTHROPIC_API_KEY` env variable)
+- **For OpenAI provider**: OpenAI API key (set as `OPENAI_API_KEY` env variable)
 - **For Ollama provider**: Ollama installed and running locally ([ollama.com](https://ollama.com))
 
 ### Build from Source
@@ -73,7 +74,19 @@ gliik init
    export ANTHROPIC_API_KEY="your-api-key-here"
    ```
 
-   **Option B: Ollama (local)**
+   **Option B: OpenAI**
+   ```yaml
+   provider: openai
+   openai:
+     endpoint: https://api.openai.com/v1
+     model: gpt-4o-mini
+   ```
+   Then set your API key:
+   ```bash
+   export OPENAI_API_KEY="sk-your-api-key-here"
+   ```
+
+   **Option C: Ollama (local)**
    ```yaml
    provider: ollama
    ollama:
@@ -86,7 +99,7 @@ gliik init
    ollama pull llama3.2
    ```
 
-Add the `export` to your `~/.bashrc` or `~/.zshrc` to persist the API key.
+Add the `export` to your `~/.bashrc` or `~/.zshrc` to persist API keys.
 
 ## Quick Start
 
@@ -220,11 +233,15 @@ Located at `~/.config/gliik/config.yaml`:
 default_model: claude-sonnet-4-20250514
 editor: vim
 instructions_dir: ~/.gliik/instructions  # Optional: custom instructions directory
-provider: anthropic  # or "ollama"
+provider: anthropic  # or "openai" or "ollama"
 
 # Provider-specific configuration
 anthropic:
   model: claude-sonnet-4-20250514
+
+openai:
+  endpoint: https://api.openai.com/v1
+  model: gpt-4o-mini
 
 ollama:
   endpoint: http://localhost:11434
@@ -232,14 +249,17 @@ ollama:
 ```
 
 **Configuration options:**
-- `provider`: Choose between `"anthropic"` (cloud) or `"ollama"` (local)
+- `provider`: Choose between `"anthropic"`, `"openai"`, or `"ollama"`
 - `anthropic.model`: Which Claude model to use
+- `openai.endpoint`: OpenAI API endpoint (supports Azure OpenAI and compatible APIs)
+- `openai.model`: Which OpenAI model to use (e.g., gpt-4o, gpt-4o-mini, gpt-3.5-turbo)
 - `ollama.endpoint`: Ollama server URL (default: `http://localhost:11434`)
 - `ollama.model`: Which Ollama model to use (run `ollama list` to see available models)
 
 ## Environment Variables
 
 - `ANTHROPIC_API_KEY` - Your Anthropic API key (required only when using `provider: anthropic`)
+- `OPENAI_API_KEY` - Your OpenAI API key (required only when using `provider: openai`)
 - `EDITOR` - Text editor for editing instructions (default: vim)
 
 ## Examples

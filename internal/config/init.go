@@ -18,6 +18,12 @@ type OllamaConfig struct {
 	Model    string `yaml:"model"`
 }
 
+// OpenAIConfig holds configuration for the OpenAI provider.
+type OpenAIConfig struct {
+	Endpoint string `yaml:"endpoint"`
+	Model    string `yaml:"model"`
+}
+
 // Config represents the Gliik configuration file structure.
 type Config struct {
 	DefaultModel    string `yaml:"default_model"`
@@ -28,12 +34,13 @@ type Config struct {
 	Provider  string          `yaml:"provider"`
 	Anthropic AnthropicConfig `yaml:"anthropic"`
 	Ollama    OllamaConfig    `yaml:"ollama"`
+	OpenAI    OpenAIConfig    `yaml:"openai"`
 }
 
-// ValidateProvider checks if the provider value is either "anthropic" or "ollama".
+// ValidateProvider checks if the provider value is either "anthropic", "ollama", or "openai".
 func (c *Config) ValidateProvider() error {
-	if c.Provider != "anthropic" && c.Provider != "ollama" {
-		return fmt.Errorf("invalid provider '%s': must be 'anthropic' or 'ollama'", c.Provider)
+	if c.Provider != "anthropic" && c.Provider != "ollama" && c.Provider != "openai" {
+		return fmt.Errorf("invalid provider '%s': must be 'anthropic', 'ollama', or 'openai'", c.Provider)
 	}
 	return nil
 }
@@ -61,6 +68,10 @@ func Initialize(instructionsDir string) error {
 		Ollama: OllamaConfig{
 			Endpoint: "http://localhost:11434",
 			Model:    "llama3.2",
+		},
+		OpenAI: OpenAIConfig{
+			Endpoint: "https://api.openai.com/v1",
+			Model:    "gpt-4o-mini",
 		},
 	}
 
