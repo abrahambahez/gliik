@@ -38,6 +38,11 @@ go build
 
 This creates a `gliik` binary in the current directory.
 
+To build with version from git tags:
+```bash
+go build -ldflags "-X 'github.com/yourusername/gliik/cmd.version=$(git describe --tags --always --dirty)'"
+```
+
 ### Install to PATH
 
 ```bash
@@ -128,6 +133,9 @@ gliik run summarize --text article.txt
 ```
 
 ## Commands
+
+### `gliik --version`
+Show Gliik tool version
 
 ### `gliik init`
 Initialize Gliik configuration at `~/.gliik`
