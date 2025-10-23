@@ -230,7 +230,6 @@ With {{variable}} substitution support.
 Located at `~/.config/gliik/config.yaml`:
 
 ```yaml
-default_model: claude-sonnet-4-20250514
 editor: vim
 instructions_dir: ~/.gliik/instructions  # Optional: custom instructions directory
 provider: anthropic  # or "openai" or "ollama"
