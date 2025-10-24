@@ -10,7 +10,6 @@ import (
 )
 
 // AnthropicProvider implements the LLMProvider interface for Anthropic's Claude API.
-// It handles authentication and communication with the Anthropic API endpoint.
 type AnthropicProvider struct {
 	APIKey string
 	Model  string
@@ -41,7 +40,6 @@ type contentBlock struct {
 
 // NewAnthropicProvider creates a new AnthropicProvider instance by reading the
 // ANTHROPIC_API_KEY environment variable and using the provided model.
-// Returns an error if the API key is not set.
 func NewAnthropicProvider(model string) (*AnthropicProvider, error) {
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	if apiKey == "" {
@@ -55,9 +53,7 @@ func NewAnthropicProvider(model string) (*AnthropicProvider, error) {
 }
 
 // StreamCompletion sends a request to the Anthropic API with the given systemPrompt
-// and userMessage, then prints the response directly to stdout in real-time.
-// The systemPrompt provides context and instructions, while userMessage contains
-// the actual user input or request.
+// and userMessage, then streams the response directly to stdout in real-time.
 func (a *AnthropicProvider) StreamCompletion(systemPrompt, userMessage string) error {
 	reqBody := messageRequest{
 		Model:     a.Model,

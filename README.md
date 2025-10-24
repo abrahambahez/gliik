@@ -3,12 +3,12 @@
 A CLI tool for managing and executing AI prompts (called "instructions") following UNIX philosophy: composability, minimalism, and clear separation of concerns.
 
 >[!note]
-> This is an early version. Supports Anthropic Claude, OpenAI, and Ollama providers.
+> This is an early version. Supports Anthropic Claude, OpenAI, Google Gemini, and Ollama providers.
 >
 
 ## Features
 
-- **Multiple AI providers**: Anthropic Claude, OpenAI, or Ollama (local)
+- **Multiple AI providers**: Anthropic Claude, OpenAI, Google Gemini, or Ollama (local)
 - Store reusable AI prompts as instructions
 - **Markdown-based format** with YAML frontmatter for metadata
 - Variable substitution with `{{variable}}` syntax
@@ -27,6 +27,7 @@ A CLI tool for managing and executing AI prompts (called "instructions") followi
 - Go 1.24 or later
 - **For Anthropic provider**: Anthropic API key (set as `ANTHROPIC_API_KEY` env variable)
 - **For OpenAI provider**: OpenAI API key (set as `OPENAI_API_KEY` env variable)
+- **For Gemini provider**: Google API key (set as `GOOGLE_API_KEY` env variable)
 - **For Ollama provider**: Ollama installed and running locally ([ollama.com](https://ollama.com))
 
 ### Build from Source
@@ -86,7 +87,18 @@ gliik init
    export OPENAI_API_KEY="sk-your-api-key-here"
    ```
 
-   **Option C: Ollama (local)**
+   **Option C: Google Gemini**
+   ```yaml
+   provider: gemini
+   gemini:
+     model: gemini-2.0-flash
+   ```
+   Then set your API key:
+   ```bash
+   export GOOGLE_API_KEY="your-api-key-here"
+   ```
+
+   **Option D: Ollama (local)**
    ```yaml
    provider: ollama
    ollama:
@@ -232,7 +244,7 @@ Located at `~/.config/gliik/config.yaml`:
 ```yaml
 editor: vim
 instructions_dir: ~/.gliik/instructions  # Optional: custom instructions directory
-provider: anthropic  # or "openai" or "ollama"
+provider: anthropic  # or "openai", "gemini", or "ollama"
 
 # Provider-specific configuration
 anthropic:
@@ -242,16 +254,20 @@ openai:
   endpoint: https://api.openai.com/v1
   model: gpt-4o-mini
 
+gemini:
+  model: gemini-2.0-flash
+
 ollama:
   endpoint: http://localhost:11434
   model: llama3.2
 ```
 
 **Configuration options:**
-- `provider`: Choose between `"anthropic"`, `"openai"`, or `"ollama"`
+- `provider`: Choose between `"anthropic"`, `"openai"`, `"gemini"`, or `"ollama"`
 - `anthropic.model`: Which Claude model to use
 - `openai.endpoint`: OpenAI API endpoint (supports Azure OpenAI and compatible APIs)
 - `openai.model`: Which OpenAI model to use (e.g., gpt-4o, gpt-4o-mini, gpt-3.5-turbo)
+- `gemini.model`: Which Gemini model to use (e.g., gemini-2.0-flash, gemini-2.5-flash, gemini-2.5-pro)
 - `ollama.endpoint`: Ollama server URL (default: `http://localhost:11434`)
 - `ollama.model`: Which Ollama model to use (run `ollama list` to see available models)
 
@@ -259,6 +275,7 @@ ollama:
 
 - `ANTHROPIC_API_KEY` - Your Anthropic API key (required only when using `provider: anthropic`)
 - `OPENAI_API_KEY` - Your OpenAI API key (required only when using `provider: openai`)
+- `GOOGLE_API_KEY` - Your Google API key (required only when using `provider: gemini`)
 - `EDITOR` - Text editor for editing instructions (default: vim)
 
 ## Examples

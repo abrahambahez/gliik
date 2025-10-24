@@ -24,23 +24,29 @@ type OpenAIConfig struct {
 	Model    string `yaml:"model"`
 }
 
+// GeminiConfig holds configuration for the Gemini provider.
+type GeminiConfig struct {
+	Model string `yaml:"model"`
+}
+
 // Config represents the Gliik configuration file structure.
 type Config struct {
 	DefaultModel    string `yaml:"default_model"`
 	Editor          string `yaml:"editor"`
 	InstructionsDir string `yaml:"instructions_dir,omitempty"`
 	// Provider specifies the LLM provider to use for instruction execution.
-	// Valid values: "anthropic" (default) or "ollama".
+	// Valid values: "anthropic" (default), "ollama", "openai", or "gemini".
 	Provider  string          `yaml:"provider"`
 	Anthropic AnthropicConfig `yaml:"anthropic"`
 	Ollama    OllamaConfig    `yaml:"ollama"`
 	OpenAI    OpenAIConfig    `yaml:"openai"`
+	Gemini    GeminiConfig    `yaml:"gemini"`
 }
 
-// ValidateProvider checks if the provider value is either "anthropic", "ollama", or "openai".
+// ValidateProvider checks if the provider value is either "anthropic", "ollama", "openai", or "gemini".
 func (c *Config) ValidateProvider() error {
-	if c.Provider != "anthropic" && c.Provider != "ollama" && c.Provider != "openai" {
-		return fmt.Errorf("invalid provider '%s': must be 'anthropic', 'ollama', or 'openai'", c.Provider)
+	if c.Provider != "anthropic" && c.Provider != "ollama" && c.Provider != "openai" && c.Provider != "gemini" {
+		return fmt.Errorf("invalid provider '%s': must be 'anthropic', 'ollama', 'openai', or 'gemini'", c.Provider)
 	}
 	return nil
 }
@@ -72,6 +78,9 @@ func Initialize(instructionsDir string) error {
 		OpenAI: OpenAIConfig{
 			Endpoint: "https://api.openai.com/v1",
 			Model:    "gpt-4o-mini",
+		},
+		Gemini: GeminiConfig{
+			Model: "gemini-2.0-flash",
 		},
 	}
 

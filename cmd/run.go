@@ -133,6 +133,15 @@ func executeInstruction(name string, cmd *cobra.Command) error {
 		if err != nil {
 			return err
 		}
+	} else if cfg.Provider == "gemini" {
+		model := cfg.Gemini.Model
+		if model == "" {
+			model = "gemini-2.0-flash"
+		}
+		llmProvider, err = provider.NewGeminiProvider(model)
+		if err != nil {
+			return err
+		}
 	} else {
 		model := cfg.Anthropic.Model
 		if model == "" {
