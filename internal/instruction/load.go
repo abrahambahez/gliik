@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/yourusername/gliik/internal/config"
-	"gopkg.in/yaml.v3"
 )
 
 func Load(name string) (*Instruction, error) {
@@ -20,35 +19,29 @@ func Load(name string) (*Instruction, error) {
 		return nil, fmt.Errorf("instruction '%s' not found", name)
 	}
 
-	metaFile := filepath.Join(instructionDir, "meta.yaml")
-	metaData, err := os.ReadFile(metaFile)
+	instructionFile := filepath.Join(instructionDir, "instruction.md")
+	instructionData, err := os.ReadFile(instructionFile)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read meta.yaml: %w", err)
+		return nil, fmt.Errorf("failed to read instruction.md: %w", err)
 	}
 
-	var meta Meta
-	if err := yaml.Unmarshal(metaData, &meta); err != nil {
-		return nil, fmt.Errorf("failed to parse meta.yaml: %w", err)
+	meta, systemText, err := ParseFrontmatter(string(instructionData))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse instruction.md: %w", err)
 	}
 
 	if len(meta.Tags) == 0 {
-		fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'tags' in meta.yaml\n", name)
+		fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'tags' in frontmatter\n", name)
 	}
 
 	if meta.Lang == "" {
-		fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'lang' in meta.yaml\n", name)
-	}
-
-	systemFile := filepath.Join(instructionDir, "system.txt")
-	systemText, err := os.ReadFile(systemFile)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read system.txt: %w", err)
+		fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'lang' in frontmatter\n", name)
 	}
 
 	return &Instruction{
 		Name:       name,
 		Path:       instructionDir,
-		SystemText: string(systemText),
+		SystemText: systemText,
 		Meta:       meta,
 	}, nil
 }

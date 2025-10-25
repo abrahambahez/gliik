@@ -1,4 +1,4 @@
-package ai
+package provider
 
 import (
 	"bytes"
@@ -9,15 +9,19 @@ import (
 	"os"
 )
 
-type Client struct {
+// AnthropicProvider implements the LLMProvider interface for Anthropic's Claude API.
+type AnthropicProvider struct {
 	APIKey string
 	Model  string
 }
+
+var _ LLMProvider = (*AnthropicProvider)(nil)
 
 type messageRequest struct {
 	Model     string    `json:"model"`
 	MaxTokens int       `json:"max_tokens"`
 	Messages  []message `json:"messages"`
+	System    string    `json:"system,omitempty"`
 }
 
 type message struct {
@@ -34,64 +38,70 @@ type contentBlock struct {
 	Text string `json:"text"`
 }
 
-func NewClient() (*Client, error) {
+// NewAnthropicProvider creates a new AnthropicProvider instance by reading the
+// ANTHROPIC_API_KEY environment variable and using the provided model.
+func NewAnthropicProvider(model string) (*AnthropicProvider, error) {
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	if apiKey == "" {
 		return nil, fmt.Errorf("ANTHROPIC_API_KEY environment variable is not set")
 	}
 
-	return &Client{
+	return &AnthropicProvider{
 		APIKey: apiKey,
-		Model:  "claude-sonnet-4-20250514",
+		Model:  model,
 	}, nil
 }
 
-func (c *Client) Complete(prompt string) (string, error) {
+// StreamCompletion sends a request to the Anthropic API with the given systemPrompt
+// and userMessage, then streams the response directly to stdout in real-time.
+func (a *AnthropicProvider) StreamCompletion(systemPrompt, userMessage string) error {
 	reqBody := messageRequest{
-		Model:     c.Model,
+		Model:     a.Model,
 		MaxTokens: 4096,
+		System:    systemPrompt,
 		Messages: []message{
 			{
 				Role:    "user",
-				Content: prompt,
+				Content: userMessage,
 			},
 		},
 	}
 
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request: %w", err)
+		return fmt.Errorf("failed to marshal request: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", "https://api.anthropic.com/v1/messages", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %w", err)
+		return fmt.Errorf("failed to create request: %w", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", c.APIKey)
+	req.Header.Set("x-api-key", a.APIKey)
 	req.Header.Set("anthropic-version", "2023-06-01")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("API request failed: %w", err)
+		return fmt.Errorf("API request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+		return fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
 	}
 
 	var response messageResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return "", fmt.Errorf("failed to decode response: %w", err)
+		return fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	if len(response.Content) == 0 {
-		return "", fmt.Errorf("no content in response")
+		return fmt.Errorf("no content in response")
 	}
 
-	return response.Content[0].Text, nil
+	fmt.Print(response.Content[0].Text)
+	return nil
 }

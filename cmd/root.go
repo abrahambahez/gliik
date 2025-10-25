@@ -7,9 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var version = "dev"
+
 var rootCmd = &cobra.Command{
-	Use:   "gliik",
-	Short: "A CLI tool for managing and executing AI prompts",
+	Use:     "gliik",
+	Short:   "A CLI tool for managing and executing AI prompts",
+	Version: version,
 	Long: `Gliik is a CLI tool for managing and executing AI prompts (called "instructions")
 following UNIX philosophy: composability, minimalism, and clear separation of concerns.
 

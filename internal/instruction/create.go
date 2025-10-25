@@ -68,11 +68,6 @@ func Create(name, description string, tags []string, lang string) error {
 		return fmt.Errorf("failed to create instruction directory: %w", err)
 	}
 
-	systemFile := filepath.Join(instructionDir, "system.txt")
-	if err := os.WriteFile(systemFile, []byte(""), 0644); err != nil {
-		return fmt.Errorf("failed to create system.txt: %w", err)
-	}
-
 	meta := Meta{
 		Version:     "0.1.0",
 		Description: description,
@@ -82,12 +77,14 @@ func Create(name, description string, tags []string, lang string) error {
 
 	metaData, err := yaml.Marshal(&meta)
 	if err != nil {
-		return fmt.Errorf("failed to marshal meta.yaml: %w", err)
+		return fmt.Errorf("failed to marshal frontmatter: %w", err)
 	}
 
-	metaFile := filepath.Join(instructionDir, "meta.yaml")
-	if err := os.WriteFile(metaFile, metaData, 0644); err != nil {
-		return fmt.Errorf("failed to write meta.yaml: %w", err)
+	instructionContent := fmt.Sprintf("---\n%s---\n# %s\n\n", string(metaData), name)
+
+	instructionFile := filepath.Join(instructionDir, "instruction.md")
+	if err := os.WriteFile(instructionFile, []byte(instructionContent), 0644); err != nil {
+		return fmt.Errorf("failed to write instruction.md: %w", err)
 	}
 
 	editor := os.Getenv("EDITOR")
@@ -95,7 +92,7 @@ func Create(name, description string, tags []string, lang string) error {
 		editor = "vim"
 	}
 
-	cmd := exec.Command(editor, systemFile)
+	cmd := exec.Command(editor, instructionFile)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
