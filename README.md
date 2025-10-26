@@ -174,6 +174,9 @@ List all instructions with versions and descriptions
 ### `gliik edit <name>`
 Edit an instruction's instruction.md file
 
+### `gliik print <name>`
+Print instruction prompt body to stdout (without variable substitution)
+
 ### `gliik run <name> [flags]`
 Execute an instruction with AI
 
