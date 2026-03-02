@@ -45,17 +45,21 @@ func ValidateTags(tags []string) error {
 	return nil
 }
 
-func Create(name, description string, tags []string, lang string) error {
+func Create(name, description, instrType, skillName string, tags []string, lang string) error {
 	if err := ValidateName(name); err != nil {
 		return err
 	}
 
-	if err := ValidateTags(tags); err != nil {
-		return err
+	if len(tags) > 0 {
+		if err := ValidateTags(tags); err != nil {
+			return err
+		}
 	}
 
-	if err := ValidateLanguageCode(lang); err != nil {
-		return err
+	if lang != "" {
+		if err := ValidateLanguageCode(lang); err != nil {
+			return err
+		}
 	}
 
 	instructionDir := filepath.Join(config.GetInstructionsDir(), name)
@@ -73,6 +77,8 @@ func Create(name, description string, tags []string, lang string) error {
 		Description: description,
 		Tags:        tags,
 		Lang:        lang,
+		Type:        instrType,
+		Name:        skillName,
 	}
 
 	metaData, err := yaml.Marshal(&meta)

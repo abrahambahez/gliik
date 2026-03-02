@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/yourusername/gliik/internal/instruction"
@@ -24,11 +23,9 @@ var listCmd = &cobra.Command{
 		}
 
 		for _, inst := range instructions {
-			tags := strings.Join(inst.Meta.Tags, ", ")
-			fmt.Printf("%s v%s [%s] - %s\n\n",
+			fmt.Printf("%s [%s] - %s\n",
 				inst.Name,
 				inst.Meta.Version,
-				tags,
 				inst.Meta.Description)
 		}
 

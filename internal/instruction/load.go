@@ -8,6 +8,8 @@ import (
 	"github.com/yourusername/gliik/internal/config"
 )
 
+var validTypes = map[string]bool{"prompt": true, "skill": true, "context": true}
+
 func Load(name string) (*Instruction, error) {
 	if err := ValidateName(name); err != nil {
 		return nil, err
@@ -30,12 +32,16 @@ func Load(name string) (*Instruction, error) {
 		return nil, fmt.Errorf("failed to parse instruction.md: %w", err)
 	}
 
-	if len(meta.Tags) == 0 {
-		fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'tags' in frontmatter\n", name)
+	if meta.Type == "" {
+		meta.Type = "prompt"
 	}
 
-	if meta.Lang == "" {
-		fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'lang' in frontmatter\n", name)
+	if !validTypes[meta.Type] {
+		return nil, fmt.Errorf("instruction '%s' has invalid type '%s': must be prompt, skill, or context", name, meta.Type)
+	}
+
+	if meta.Type == "skill" && meta.Name == "" {
+		return nil, fmt.Errorf("instruction '%s' of type 'skill' requires a 'name' field in frontmatter", name)
 	}
 
 	return &Instruction{

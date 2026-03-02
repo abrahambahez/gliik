@@ -64,6 +64,10 @@ func executeInstruction(name string, cmd *cobra.Command) error {
 		return err
 	}
 
+	if inst.Meta.Type != "prompt" {
+		return fmt.Errorf("instruction '%s' has type '%s' and cannot be executed\n\nDeploy it to a project with: gliik deploy %s", name, inst.Meta.Type, name)
+	}
+
 	variables, err := instruction.ParseVariables(inst.SystemText)
 	if err != nil {
 		return err
