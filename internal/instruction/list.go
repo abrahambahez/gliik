@@ -37,14 +37,6 @@ func ListAll() ([]Instruction, error) {
 			continue
 		}
 
-		if len(meta.Tags) == 0 {
-			fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'tags' in frontmatter\n", name)
-		}
-
-		if meta.Lang == "" {
-			fmt.Fprintf(os.Stderr, "Warning: instruction '%s' missing required field 'lang' in frontmatter\n", name)
-		}
-
 		instructions = append(instructions, Instruction{
 			Name: name,
 			Path: instructionPath,
