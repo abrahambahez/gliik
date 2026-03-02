@@ -10,13 +10,6 @@ import (
 func TestLoad_ValidInstructionMD(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	originalGetInstructionsDir := getInstructionsDirForTest
-	defer func() { getInstructionsDirForTest = originalGetInstructionsDir }()
-
-	getInstructionsDirForTest = func() string {
-		return tmpDir
-	}
-
 	instructionName := "test_instruction"
 	instructionDir := filepath.Join(tmpDir, instructionName)
 
@@ -144,10 +137,6 @@ Metadata like version, description, tags, and lang should be in Meta, not System
 	if !strings.Contains(instr.SystemText, "The LLM should only receive this markdown body") {
 		t.Error("SystemText missing expected body content")
 	}
-}
-
-var getInstructionsDirForTest = func() string {
-	return ""
 }
 
 func TestLoad_MissingInstructionMD(t *testing.T) {
