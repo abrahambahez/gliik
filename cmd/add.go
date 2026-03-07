@@ -18,15 +18,9 @@ var addCmd = &cobra.Command{
 		description, _ := cmd.Flags().GetString("description")
 		tagsStr, _ := cmd.Flags().GetString("tags")
 		lang, _ := cmd.Flags().GetString("lang")
-		instrType, _ := cmd.Flags().GetString("type")
-		skillName, _ := cmd.Flags().GetString("name")
 
 		if description == "" {
 			return fmt.Errorf("missing required flag: --description")
-		}
-
-		if instrType == "skill" && skillName == "" {
-			return fmt.Errorf("--name is required when --type is skill")
 		}
 
 		var tags []string
@@ -37,7 +31,7 @@ var addCmd = &cobra.Command{
 			}
 		}
 
-		if err := instruction.Create(name, description, instrType, skillName, tags, lang); err != nil {
+		if err := instruction.Create(name, description, tags, lang); err != nil {
 			return err
 		}
 
@@ -50,7 +44,5 @@ func init() {
 	addCmd.Flags().StringP("description", "d", "", "Description of the instruction (required)")
 	addCmd.Flags().StringP("tags", "t", "", "Comma-separated tags")
 	addCmd.Flags().StringP("lang", "l", "", "Language ISO code")
-	addCmd.Flags().String("type", "prompt", "Instruction type: prompt, skill, or context")
-	addCmd.Flags().String("name", "", "Skill name (required when --type skill)")
 	rootCmd.AddCommand(addCmd)
 }

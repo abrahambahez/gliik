@@ -45,7 +45,7 @@ func ValidateTags(tags []string) error {
 	return nil
 }
 
-func Create(name, description, instrType, skillName string, tags []string, lang string) error {
+func Create(name, description string, tags []string, lang string) error {
 	if err := ValidateName(name); err != nil {
 		return err
 	}
@@ -77,8 +77,6 @@ func Create(name, description, instrType, skillName string, tags []string, lang 
 		Description: description,
 		Tags:        tags,
 		Lang:        lang,
-		Type:        instrType,
-		Name:        skillName,
 	}
 
 	metaData, err := yaml.Marshal(&meta)
